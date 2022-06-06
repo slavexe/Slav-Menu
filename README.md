@@ -1,6 +1,8 @@
 # Slav-Menu
 Slav Menu is an open source modding tool designed for GTA V modders with features that aid in development.
 ## Music Event Player
+![Image Not Available](https://user-images.githubusercontent.com/69091521/172229926-30f7d0de-bb0b-493a-b51b-eec9cd9a6982.png)  
+
 A comprehensive music event player that efficiently sorts and plays all 1,500+ music events found in GTA V. 
 They are sorted alphabetically based on the mission they are from as well as chronologically within that mission.
 The music events are categorized as follows:
@@ -11,6 +13,8 @@ The music events are categorized as follows:
 - **Online Content**
 - **Miscellaneous**
 ## Ped Prop Allign Tool
+![Image Not Available](https://user-images.githubusercontent.com/69091521/172230973-be54765e-b1f5-465e-b5d0-88712bfc82ca.png)  
+
 A tool that can attach any prop to any ped and adjust the position and rotation of that prop relative to the ped bone it was mounted to.
 This can be used for many things, for example perfectly aligning a drill into a ped's hand to make it look as if they are holding it.
 When a desired position and rotation are selected one can effortlessly copy them to their clipboard and use them in their projects.
