@@ -31,4 +31,4 @@ Below are the requirements for Slav Menu to work:
 - Ped bone indices for use in Ped Prop Align Tool can be found on the [RAGE Multiplayer Wiki](https://wiki.rage.mp/index.php?title=Bones)  
 ## Contributing
 Anyone is welcome to submit pull requests to refine music event names or to add new music events.
-The menu will automatically create submenus and items for any additional music events, therefore all that needs to be modified is **MusicEventData.json**.
+The menu will automatically create submenus and items for any additional music events, therefore all that needs to be modified is [MusicEventData.json](./Slav%20Menu/MusicEventData.json).
