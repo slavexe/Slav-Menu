@@ -3,222 +3,216 @@ using GTA.Math;
 using GTA.Native;
 using GTA.UI;
 using LemonUI;
-using LemonUI.Elements;
-using LemonUI.Extensions;
 using LemonUI.Menus;
-using LemonUI.Scaleform;
-using LemonUI.TimerBars;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
-using Newtonsoft.Json.Serialization;
-using System;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Windows.Forms;
 
 namespace Slav_Menu
 {
     public class Menu : Script
     {
-        ObjectPool menuPool = new ObjectPool();
+        private ObjectPool menuPool = new ObjectPool();
 
-        NativeMenu mainMenu = new NativeMenu("Slav Menu", "Main Menu");
-        NativeMenu pedPropMenu = new NativeMenu("Slav Menu", "Ped Prop Allign Tool");
-        NativeMenu musicEventMenu = new NativeMenu("Slav Menu", "Music Event Player");
+        private NativeMenu mainMenu = new NativeMenu("Slav Menu", "Main Menu");
+        private NativeMenu pedPropMenu = new NativeMenu("Slav Menu", "Ped Prop Allign Tool");
+        private NativeMenu musicEventMenu = new NativeMenu("Slav Menu", "Music Event Player");
+        private NativeMenu uiPosMenu = new NativeMenu("Slav Menu", "UI Position Tool");
 
-        ScriptSettings slavSettings;
+        private ScriptSettings slavSettings;
+
+        private Keys menuOpenKey;
+        private Keys clipboardKey;
+
+        private int gameTimeOffset;
+
+        private string clipboardText = "";
 
         #region PedPropAllignDeclarations
 
-        bool loadModel = false;
-        bool loadProp = false;
-        bool softPinning = false;
-        bool collision = false;
-        bool isPed = false;
-        bool fixedRot = true;
-        bool propLoaded = false;
-        bool xInvert = false;
-        bool yInvert = false;
-        bool zInvert = false;
-        string propInput = "";
-        string boneInput = "";
-        string vertexInput = "";
-        string clipboardText = "";
-        int boneIndex = 90;
-        int vertex = 2;
-        float propXpos = 0f;
-        float propYpos = 0f;
-        float propZpos = 0f;
-        float propXrot = 0f;
-        float propYrot = 0f;
-        float propZrot = 0f;
+        private bool loadModel = false;
+        private bool loadProp = false;
+        private bool softPinning = false;
+        private bool collision = false;
+        private bool isPed = false;
+        private bool fixedRot = true;
+        private bool propLoaded = false;
+        private bool xInvert = false;
+        private bool yInvert = false;
+        private bool zInvert = false;
+        private int boneIndex = 90;
+        private int vertex = 2;
+        private float propXpos = 0f;
+        private float propYpos = 0f;
+        private float propZpos = 0f;
+        private float propXrot = 0f;
+        private float propYrot = 0f;
+        private float propZrot = 0f;
+        private string propInput = "";
+        private string boneInput = "";
+        private string vertexInput = "";
 
-        Model propModel;
-        Prop? prop;
+        private Model propModel;
 
-        NativeMenu adjustmentMenu = new NativeMenu("Ped Prop Align Tool", "Adjust Position and Rotation")
+        private Prop? prop;
+
+        private NativeMenu adjustmentMenu = new NativeMenu("Ped Prop Align Tool", "Adjust Position and Rotation")
         {
             Width = 500,
         };
-        NativeItem propItem = new NativeItem("Input Prop Name");
-        NativeItem boneItem = new NativeItem("Input Bone Index");
-        NativeItem vertexItem = new NativeItem("Input Vertex");
-        NativeCheckboxItem softPinningItem = new NativeCheckboxItem("Enable Soft Pinning")
+        private NativeItem propItem = new NativeItem("Input Prop Name");
+        private NativeItem boneItem = new NativeItem("Input Bone Index");
+        private NativeItem vertexItem = new NativeItem("Input Vertex");
+        private NativeCheckboxItem softPinningItem = new NativeCheckboxItem("Enable Soft Pinning")
         {
             Checked = false,
         };
-        NativeCheckboxItem collisionItem = new NativeCheckboxItem("Enable Collision")
+        private NativeCheckboxItem collisionItem = new NativeCheckboxItem("Enable Collision")
         {
             Checked = false,
         };
-        NativeCheckboxItem isPedItem = new NativeCheckboxItem("Enable Is Ped")
+        private NativeCheckboxItem isPedItem = new NativeCheckboxItem("Enable Is Ped")
         {
             Checked = false,
         };
-        NativeCheckboxItem fixedRotItem = new NativeCheckboxItem("Enable Fixed Rotation")
+        private NativeCheckboxItem fixedRotItem = new NativeCheckboxItem("Enable Fixed Rotation")
         {
             Checked = true,
         };
-        NativeItem addItem = new NativeItem("Add Prop");
-        NativeItem removeItem = new NativeItem("Remove Prop");
-        NativeCheckboxItem xinvertItem = new NativeCheckboxItem("Invert X Position")
+        private NativeItem addItem = new NativeItem("Add Prop");
+        private NativeItem removeItem = new NativeItem("Remove Prop");
+        private NativeCheckboxItem xinvertItem = new NativeCheckboxItem("Invert X Position")
         {
             Checked = false,
         };
-        NativeSliderItem xPosSlider = new NativeSliderItem("X Position")
+        private NativeSliderItem xPosSlider = new NativeSliderItem("X Position")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem xPosSliderTe = new NativeSliderItem("X Position Tenth")
+        private NativeSliderItem xPosSliderTe = new NativeSliderItem("X Position Tenth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem xPosSliderHu = new NativeSliderItem("X Position Hundredth")
+        private NativeSliderItem xPosSliderHu = new NativeSliderItem("X Position Hundredth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem xPosSliderTo = new NativeSliderItem("X Position Thousandth")
+        private NativeSliderItem xPosSliderTo = new NativeSliderItem("X Position Thousandth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSeparatorItem xySeperator = new NativeSeparatorItem();
-        NativeCheckboxItem yinvertItem = new NativeCheckboxItem("Invert Y Position")
+        private NativeSeparatorItem xySeperator = new NativeSeparatorItem();
+        private NativeCheckboxItem yinvertItem = new NativeCheckboxItem("Invert Y Position")
         {
             Checked = false,
         };
-        NativeSliderItem yPosSlider = new NativeSliderItem("Y Position")
+        private NativeSliderItem yPosSlider = new NativeSliderItem("Y Position")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem yPosSliderTe = new NativeSliderItem("Y Position Tenth")
+        private NativeSliderItem yPosSliderTe = new NativeSliderItem("Y Position Tenth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem yPosSliderHu = new NativeSliderItem("Y Position Hundredth")
+        private NativeSliderItem yPosSliderHu = new NativeSliderItem("Y Position Hundredth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem yPosSliderTo = new NativeSliderItem("Y Position Thousandth")
+        private NativeSliderItem yPosSliderTo = new NativeSliderItem("Y Position Thousandth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSeparatorItem yzSeperator = new NativeSeparatorItem();
-        NativeCheckboxItem zinvertItem = new NativeCheckboxItem("Invert Z Position")
+        private NativeSeparatorItem yzSeperator = new NativeSeparatorItem();
+        private NativeCheckboxItem zinvertItem = new NativeCheckboxItem("Invert Z Position")
         {
             Checked = false,
         };
-        NativeSliderItem zPosSlider = new NativeSliderItem("Z Position")
+        private NativeSliderItem zPosSlider = new NativeSliderItem("Z Position")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem zPosSliderTe = new NativeSliderItem("Z Position Tenth")
+        private NativeSliderItem zPosSliderTe = new NativeSliderItem("Z Position Tenth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem zPosSliderHu = new NativeSliderItem("Z Position Hundredth")
+        private NativeSliderItem zPosSliderHu = new NativeSliderItem("Z Position Hundredth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem zPosSliderTo = new NativeSliderItem("Z Position Thousandth")
+        private NativeSliderItem zPosSliderTo = new NativeSliderItem("Z Position Thousandth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSeparatorItem zxrSeperator = new NativeSeparatorItem();
-        NativeSliderItem xRotSlider = new NativeSliderItem("X Rotation")
+        private NativeSeparatorItem zxrSeperator = new NativeSeparatorItem();
+        private NativeSliderItem xRotSlider = new NativeSliderItem("X Rotation")
         {
             Maximum = 360,
             Value = 0,
         };
-        NativeSliderItem xRotSliderTe = new NativeSliderItem("X Rotation Tenth")
+        private NativeSliderItem xRotSliderTe = new NativeSliderItem("X Rotation Tenth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem xRotSliderHu = new NativeSliderItem("X Rotation Hundredth")
+        private NativeSliderItem xRotSliderHu = new NativeSliderItem("X Rotation Hundredth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem xRotSliderTo = new NativeSliderItem("X Rotation Thousandth")
+        private NativeSliderItem xRotSliderTo = new NativeSliderItem("X Rotation Thousandth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSeparatorItem xyrSeperator = new NativeSeparatorItem();
-        NativeSliderItem yRotSlider = new NativeSliderItem("Y Rotation")
+        private NativeSeparatorItem xyrSeperator = new NativeSeparatorItem();
+        private NativeSliderItem yRotSlider = new NativeSliderItem("Y Rotation")
         {
             Maximum = 360,
             Value = 0,
         };
-        NativeSliderItem yRotSliderTe = new NativeSliderItem("Y Rotation Tenth")
+        private NativeSliderItem yRotSliderTe = new NativeSliderItem("Y Rotation Tenth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem yRotSliderHu = new NativeSliderItem("Y Rotation Hundredth")
+        private NativeSliderItem yRotSliderHu = new NativeSliderItem("Y Rotation Hundredth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem yRotSliderTo = new NativeSliderItem("Y Rotation Thousandth")
+        private NativeSliderItem yRotSliderTo = new NativeSliderItem("Y Rotation Thousandth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSeparatorItem yzrSeperator = new NativeSeparatorItem();
-        NativeSliderItem zRotSlider = new NativeSliderItem("Z Rotation")
+        private NativeSeparatorItem yzrSeperator = new NativeSeparatorItem();
+        private NativeSliderItem zRotSlider = new NativeSliderItem("Z Rotation")
         {
             Maximum = 360,
             Value = 0,
         };
-        NativeSliderItem zRotSliderTe = new NativeSliderItem("Z Rotation Tenth")
+        private NativeSliderItem zRotSliderTe = new NativeSliderItem("Z Rotation Tenth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem zRotSliderHu = new NativeSliderItem("Z Rotation Hundredth")
+        private NativeSliderItem zRotSliderHu = new NativeSliderItem("Z Rotation Hundredth")
         {
             Maximum = 9,
             Value = 0,
         };
-        NativeSliderItem zRotSliderTo = new NativeSliderItem("Z Rotation Thousandth")
+        private NativeSliderItem zRotSliderTo = new NativeSliderItem("Z Rotation Thousandth")
         {
             Maximum = 9,
             Value = 0,
@@ -228,37 +222,142 @@ namespace Slav_Menu
 
         #region MusicEventDeclarations
 
-        bool notifEnabled = true;
-        bool currentMenuLoaded = false;
+        private bool notifEnabled = true;
+        private bool currentMenuLoaded = false;
 
-        string currentMenuName;
-        string playingMusicEvent;
+        private string currentMenuName;
+        private string playingMusicEvent;
 
-        Keys menuOpenKey;
-        Keys clipboardKey;
-        Keys stopMusicKey;
+        private Keys stopMusicKey;
 
-        MusicEventStorage jsonOutput;
+        private MusicEventStorage jsonOutput;
 
-        NativeMenu missionMenu = new NativeMenu("Music Event Player", "Missions");
-        NativeMenu strangersAndFreaksMenu = new NativeMenu("Music Event Player", "Strangers And Freaks");
-        NativeMenu randomEventsMenu = new NativeMenu("Music Event Player", "Random Events & Side Missions");
-        NativeMenu activitiesMenu = new NativeMenu("Music Event Player", "Businesses & Activities");
-        NativeMenu onlineContentMenu = new NativeMenu("Music Event Player", "Online Content");
-        NativeMenu miscellaneousMenu = new NativeMenu("Music Event Player", "Miscellaneous");
-        NativeMenu currentMenu = new NativeMenu("PlaceHolder");
+        private NativeMenu missionMenu = new NativeMenu("Music Event Player", "Missions");
+        private NativeMenu strangersAndFreaksMenu = new NativeMenu("Music Event Player", "Strangers And Freaks");
+        private NativeMenu randomEventsMenu = new NativeMenu("Music Event Player", "Random Events & Side Missions");
+        private NativeMenu activitiesMenu = new NativeMenu("Music Event Player", "Businesses & Activities");
+        private NativeMenu onlineContentMenu = new NativeMenu("Music Event Player", "Online Content");
+        private NativeMenu miscellaneousMenu = new NativeMenu("Music Event Player", "Miscellaneous");
+        private NativeMenu currentMenu = new NativeMenu("PlaceHolder");
 
-        List<NativeMenu> missionMenuList = new List<NativeMenu>();
-        List<NativeMenu> strangersAndFreaksMenuList = new List<NativeMenu>();
-        List<NativeMenu> randomEventsMenuList = new List<NativeMenu>();
-        List<NativeMenu> activitiesMenuList = new List<NativeMenu>();
-        List<NativeMenu> onlineContentMenuList = new List<NativeMenu>();
-        List<NativeMenu> miscellaneousMenuList = new List<NativeMenu>();
+        private List<NativeMenu> missionMenuList = new List<NativeMenu>();
+        private List<NativeMenu> strangersAndFreaksMenuList = new List<NativeMenu>();
+        private List<NativeMenu> randomEventsMenuList = new List<NativeMenu>();
+        private List<NativeMenu> activitiesMenuList = new List<NativeMenu>();
+        private List<NativeMenu> onlineContentMenuList = new List<NativeMenu>();
+        private List<NativeMenu> miscellaneousMenuList = new List<NativeMenu>();
 
-        NativeItem searchItem = new NativeItem("Search Music Events");
-        NativeItem playingItem = new NativeItem("");
+        private NativeItem searchItem = new NativeItem("Search Music Events");
+        private NativeItem playingItem = new NativeItem("");
 
-        NativeCheckboxItem disableAmbientItem = new NativeCheckboxItem("Disable Ambience");
+        private NativeCheckboxItem disableAmbientItem = new NativeCheckboxItem("Disable Ambience");
+
+        #endregion
+
+        #region UIPositionDeclarations
+
+        private static readonly string[] shapes = { "Rectangle", "Sprite" };
+        private bool renderShape = false;
+        private bool shapeMenuUpdated = false;
+        private bool hideHudSetting = false;
+        private bool hideHud = false;
+        private int shapeType = 0;
+        private float shapeWidth = 1f;
+        private float shapeLength = 1f;
+        private float shapeXpos = 0f;
+        private float shapeYpos = 0f;
+        private string uiTextureDict = "";
+        private string uiTextureName = "";
+
+        private NativeMenu shapeMenu = new NativeMenu("UI Position Tool", "Shape Selection");
+        private NativeListItem<string> shapeTypes = new NativeListItem<string>("Shapes", shapes);
+        private NativeItem uiTextureDictItem = new NativeItem("Texture Dictionary: ");
+        private NativeItem uiTextureNameItem = new NativeItem("Texture Name: ");
+        private NativeMenu uiAdjustmentMenu = new NativeMenu("UI Position Tool", "Adjust Position & Size")
+        {
+            Width = 500f
+        };
+        private NativeCheckboxItem uiRenderItem = new NativeCheckboxItem("Render Shape");
+        private NativeSliderItem uiWidthSlider = new NativeSliderItem("Width")
+        {
+            Maximum = 2,
+            Value = 0
+        };
+        private NativeSliderItem uiWidthSliderTe = new NativeSliderItem("Width Tenth")
+        {
+            Maximum = 9,
+            Value = 1
+        };
+        private NativeSliderItem uiWidthSliderHu = new NativeSliderItem("Width Hundredth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiWidthSliderTo = new NativeSliderItem("Width Thousandth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiLengthSlider = new NativeSliderItem("Length")
+        {
+            Maximum = 2,
+            Value = 0
+        };
+        private NativeSliderItem uiLengthSliderTe = new NativeSliderItem("Length Tenth")
+        {
+            Maximum = 9,
+            Value = 1
+        };
+        private NativeSliderItem uiLengthSliderHu = new NativeSliderItem("Length Hundredth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiLengthSliderTo = new NativeSliderItem("Length Thousandth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiXposSlider = new NativeSliderItem("X Position")
+        {
+            Maximum = 1,
+            Value = 0
+        };
+        private NativeSliderItem uiXposSliderTe = new NativeSliderItem("X Position Tenth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiXposSliderHu = new NativeSliderItem("X Position Hundredth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiXposSliderTo = new NativeSliderItem("X Position Thousandth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiYposSlider = new NativeSliderItem("Y Position")
+        {
+            Maximum = 1,
+            Value = 0
+        };
+        private NativeSliderItem uiYposSliderTe = new NativeSliderItem("Y Position Tenth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiYposSliderHu = new NativeSliderItem("Y Position Hundredth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
+        private NativeSliderItem uiYposSliderTo = new NativeSliderItem("Y Position Thousandth")
+        {
+            Maximum = 9,
+            Value = 0
+        };
 
         #endregion
 
@@ -269,12 +368,21 @@ namespace Slav_Menu
 
             slavSettings = ScriptSettings.Load("scripts\\Slav_Menu_Settings.ini");
 
+            notifEnabled = slavSettings.GetValue("General", "Notifications", true);
+            hideHudSetting = slavSettings.GetValue("General", "HideHUD", true);
+
+            menuOpenKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("Keybinds", "OpenMenuKey", "F3"), true);
+            clipboardKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("Keybinds", "CopyToClipboardKey", "NumPad0"), true);
+            stopMusicKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("Keybinds", "StopMusicKey", "Subtract"), true);
+
             menuPool.Add(mainMenu);
             menuPool.Add(pedPropMenu);
             menuPool.Add(musicEventMenu);
+            menuPool.Add(uiPosMenu);
 
             mainMenu.AddSubMenu(pedPropMenu);
             mainMenu.AddSubMenu(musicEventMenu);
+            mainMenu.AddSubMenu(uiPosMenu);
 
             #region PedPropAllignInit
 
@@ -293,30 +401,30 @@ namespace Slav_Menu
             yinvertItem.CheckboxChanged += InputYInvert;
             zinvertItem.CheckboxChanged += InputZInvert;
 
-            xPosSlider.ValueChanged += InputXPosSlider;
-            xPosSliderTe.ValueChanged += InputXPosTeSlider;
-            xPosSliderHu.ValueChanged += InputXPosHuSlider;
-            xPosSliderTo.ValueChanged += InputXPosToSlider;
-            yPosSlider.ValueChanged += InputYPosSlider;
-            yPosSliderTe.ValueChanged += InputYPosTeSlider;
-            yPosSliderHu.ValueChanged += InputYPosHuSlider;
-            yPosSliderTo.ValueChanged += InputYPosToSlider;
-            zPosSlider.ValueChanged += InputZPosSlider;
-            zPosSliderTe.ValueChanged += InputZPosTeSlider;
-            zPosSliderHu.ValueChanged += InputZPosHuSlider;
-            zPosSliderTo.ValueChanged += InputZPosToSlider;
-            xRotSlider.ValueChanged += InputXRotSlider;
-            xRotSliderTe.ValueChanged += InputXRotTeSlider;
-            xRotSliderHu.ValueChanged += InputXRotHuSlider;
-            xRotSliderTo.ValueChanged += InputXRotToSlider;
-            yRotSlider.ValueChanged += InputYRotSlider;
-            yRotSliderTe.ValueChanged += InputYRotTeSlider;
-            yRotSliderHu.ValueChanged += InputYRotHuSlider;
-            yRotSliderTo.ValueChanged += InputYRotToSlider;
-            zRotSlider.ValueChanged += InputZRotSlider;
-            zRotSliderTe.ValueChanged += InputZRotTeSlider;
-            zRotSliderHu.ValueChanged += InputZRotHuSlider;
-            zRotSliderTo.ValueChanged += InputZRotToSlider;
+            xPosSlider.ValueChanged += UpdatePedPropEvent;
+            xPosSliderTe.ValueChanged += UpdatePedPropEvent;
+            xPosSliderHu.ValueChanged += UpdatePedPropEvent;
+            xPosSliderTo.ValueChanged += UpdatePedPropEvent;
+            yPosSlider.ValueChanged += UpdatePedPropEvent;
+            yPosSliderTe.ValueChanged += UpdatePedPropEvent;
+            yPosSliderHu.ValueChanged += UpdatePedPropEvent;
+            yPosSliderTo.ValueChanged += UpdatePedPropEvent;
+            zPosSlider.ValueChanged += UpdatePedPropEvent;
+            zPosSliderTe.ValueChanged += UpdatePedPropEvent;
+            zPosSliderHu.ValueChanged += UpdatePedPropEvent;
+            zPosSliderTo.ValueChanged += UpdatePedPropEvent;
+            xRotSlider.ValueChanged += UpdatePedPropEvent;
+            xRotSliderTe.ValueChanged += UpdatePedPropEvent;
+            xRotSliderHu.ValueChanged += UpdatePedPropEvent;
+            xRotSliderTo.ValueChanged += UpdatePedPropEvent;
+            yRotSlider.ValueChanged += UpdatePedPropEvent;
+            yRotSliderTe.ValueChanged += UpdatePedPropEvent;
+            yRotSliderHu.ValueChanged += UpdatePedPropEvent;
+            yRotSliderTo.ValueChanged += UpdatePedPropEvent;
+            zRotSlider.ValueChanged += UpdatePedPropEvent;
+            zRotSliderTe.ValueChanged += UpdatePedPropEvent;
+            zRotSliderHu.ValueChanged += UpdatePedPropEvent;
+            zRotSliderTo.ValueChanged += UpdatePedPropEvent;
 
             menuPool.Add(adjustmentMenu);
 
@@ -364,32 +472,9 @@ namespace Slav_Menu
             adjustmentMenu.Add(zRotSliderHu);
             adjustmentMenu.Add(zRotSliderTo);
 
-            xPosSlider.Title = "X Position: " + xPosSlider.Value;
-            xPosSliderTe.Title = "X Position Tenth: " + xPosSliderTe.Value;
-            xPosSliderHu.Title = "X Position Hundredth: " + xPosSliderHu.Value;
-            xPosSliderTo.Title = "X Position Thousandth: " + xPosSliderTo.Value;
-            yPosSlider.Title = "Y Position: " + yPosSlider.Value;
-            yPosSliderTe.Title = "Y Position Tenth: " + yPosSliderTe.Value;
-            yPosSliderHu.Title = "Y Position Hundredth: " + yPosSliderHu.Value;
-            yPosSliderTo.Title = "Y Position Thousandth: " + yPosSliderTo.Value;
-            zPosSlider.Title = "Z Position: " + zPosSlider.Value;
-            zPosSliderTe.Title = "Z Position Tenth: " + zPosSliderTe.Value;
-            zPosSliderHu.Title = "Z Position Hundredth: " + zPosSliderHu.Value;
-            zPosSliderTo.Title = "Z Position Thousandth: " + zPosSliderTo.Value;
-            xRotSlider.Title = "X Rotation: " + xRotSlider.Value;
-            xRotSliderTe.Title = "X Rotation Tenth: " + xRotSliderTe.Value;
-            xRotSliderHu.Title = "X Rotation Hundredth: " + xRotSliderHu.Value;
-            xRotSliderTo.Title = "X Rotation Thousandth: " + xRotSliderTo.Value;
-            yRotSlider.Title = "Y Rotation: " + yRotSlider.Value;
-            yRotSliderTe.Title = "Y Rotation Tenth: " + yRotSliderTe.Value;
-            yRotSliderHu.Title = "Y Rotation Hundredth: " + yRotSliderHu.Value;
-            yRotSliderTo.Title = "Y Rotation Thousandth: " + yRotSliderTo.Value;
-            zRotSlider.Title = "Z Rotation: " + zRotSlider.Value;
-            zRotSliderTe.Title = "Z Rotation Tenth: " + zRotSliderTe.Value;
-            zRotSliderHu.Title = "Z Rotation Hundredth: " + zRotSliderHu.Value;
-            zRotSliderTo.Title = "Z Rotation Thousandth: " + zRotSliderTo.Value;
-
-            clipboardText = "X Pos: " + propXpos + ", Prop Y Pos: " + propYpos + ", Prop Z Pos: " + propZpos + ", Prop X Rot: " + propXrot + ", Prop Y Rot: " + propYrot + ", Prop Z Rot: " + propZrot;
+            UpdatePedProp();
+            UpdatePedPropNames();
+            
             #endregion
 
             #region MusicEventInit
@@ -421,7 +506,7 @@ namespace Slav_Menu
             }
             foreach (var mission in jsonOutput.Missions)
             {
-                NativeMenu currentMission = new NativeMenu("Music_Event_Player", mission.MissionName);
+                NativeMenu currentMission = new NativeMenu("Music Event Player", mission.MissionName);
                 missionMenuList.Add(currentMission);
             }
             foreach (var mission in missionMenuList)
@@ -431,7 +516,7 @@ namespace Slav_Menu
             }
             foreach (var strangerAndFreak in jsonOutput.StrangersAndFreaks)
             {
-                NativeMenu currentMission = new NativeMenu("Music_Event_Player", strangerAndFreak.StrangerAndFreakName);
+                NativeMenu currentMission = new NativeMenu("Music Event Player", strangerAndFreak.StrangerAndFreakName);
                 strangersAndFreaksMenuList.Add(currentMission);
             }
             foreach (var strangerAndFreak in strangersAndFreaksMenuList)
@@ -441,7 +526,7 @@ namespace Slav_Menu
             }
             foreach (var randomEvent in jsonOutput.RandomEvents)
             {
-                NativeMenu currentRandomEvent = new NativeMenu("Music_Event_Player", randomEvent.RandomEventName);
+                NativeMenu currentRandomEvent = new NativeMenu("Music Event Player", randomEvent.RandomEventName);
                 randomEventsMenuList.Add(currentRandomEvent);
             }
             foreach (var randomEvent in randomEventsMenuList)
@@ -451,7 +536,7 @@ namespace Slav_Menu
             }
             foreach (var activity in jsonOutput.Activities)
             {
-                NativeMenu currentActivity = new NativeMenu("Music_Event_Player", activity.ActivityName);
+                NativeMenu currentActivity = new NativeMenu("Music Event Player", activity.ActivityName);
                 activitiesMenuList.Add(currentActivity);
             }
             foreach (var activity in activitiesMenuList)
@@ -461,7 +546,7 @@ namespace Slav_Menu
             }
             foreach (var content in jsonOutput.OnlineContent)
             {
-                NativeMenu currentContent = new NativeMenu("Music_Event_Player", content.ContentName);
+                NativeMenu currentContent = new NativeMenu("Music Event Player", content.ContentName);
                 onlineContentMenuList.Add(currentContent);
             }
             foreach (var content in onlineContentMenuList)
@@ -471,7 +556,7 @@ namespace Slav_Menu
             }
             foreach (var other in jsonOutput.Miscellaneous)
             {
-                NativeMenu currentOther = new NativeMenu("Music_Event_Player", other.OtherName);
+                NativeMenu currentOther = new NativeMenu("Music Event Player", other.OtherName);
                 miscellaneousMenuList.Add(currentOther);
             }
             foreach (var other in miscellaneousMenuList)
@@ -479,10 +564,63 @@ namespace Slav_Menu
                 menuPool.Add(other);
                 miscellaneousMenu.AddSubMenu(other);
             }
-            notifEnabled = slavSettings.GetValue("General", "Notifications", true);
-            menuOpenKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("General", "OpenMenuKey", "F3"), true);
-            clipboardKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("General", "CopyToClipboardKey", "NumPad0"), true);
-            stopMusicKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("General", "StopMusicKey", "Subtract"), true);
+
+            #endregion
+
+            #region UIPositionInit
+
+            menuPool.Add(shapeMenu);
+            menuPool.Add(uiAdjustmentMenu);
+
+            uiPosMenu.AddSubMenu(shapeMenu);
+            uiPosMenu.AddSubMenu(uiAdjustmentMenu);
+            uiPosMenu.Add(uiRenderItem);
+
+            shapeMenu.Add(shapeTypes);
+            shapeMenu.Add(uiTextureDictItem);
+            shapeMenu.Add(uiTextureNameItem);
+
+            uiAdjustmentMenu.Add(uiWidthSlider);
+            uiAdjustmentMenu.Add(uiWidthSliderTe);
+            uiAdjustmentMenu.Add(uiWidthSliderHu);
+            uiAdjustmentMenu.Add(uiWidthSliderTo);
+            uiAdjustmentMenu.Add(uiLengthSlider);
+            uiAdjustmentMenu.Add(uiLengthSliderTe);
+            uiAdjustmentMenu.Add(uiLengthSliderHu);
+            uiAdjustmentMenu.Add(uiLengthSliderTo);
+            uiAdjustmentMenu.Add(uiXposSlider);
+            uiAdjustmentMenu.Add(uiXposSliderTe);
+            uiAdjustmentMenu.Add(uiXposSliderHu);
+            uiAdjustmentMenu.Add(uiXposSliderTo);
+            uiAdjustmentMenu.Add(uiYposSlider);
+            uiAdjustmentMenu.Add(uiYposSliderTe);
+            uiAdjustmentMenu.Add(uiYposSliderHu);
+            uiAdjustmentMenu.Add(uiYposSliderTo);
+
+            uiRenderItem.CheckboxChanged += RenderUIShape;
+            shapeTypes.ItemChanged += UpdateShape;
+            uiTextureDictItem.Activated += UpdateUITextureDict;
+            uiTextureNameItem.Activated += UpdateUITextureName;
+
+            uiWidthSlider.ValueChanged += UpdateUIEvent;
+            uiWidthSliderTe.ValueChanged += UpdateUIEvent;
+            uiWidthSliderHu.ValueChanged += UpdateUIEvent;
+            uiWidthSliderTo.ValueChanged += UpdateUIEvent;
+            uiLengthSlider.ValueChanged += UpdateUIEvent;
+            uiLengthSliderTe.ValueChanged += UpdateUIEvent;
+            uiLengthSliderHu.ValueChanged += UpdateUIEvent;
+            uiLengthSliderTo.ValueChanged += UpdateUIEvent;
+            uiXposSlider.ValueChanged += UpdateUIEvent;
+            uiXposSliderTe.ValueChanged += UpdateUIEvent;
+            uiXposSliderHu.ValueChanged += UpdateUIEvent;
+            uiXposSliderTo.ValueChanged += UpdateUIEvent;
+            uiYposSlider.ValueChanged += UpdateUIEvent;
+            uiYposSliderTe.ValueChanged += UpdateUIEvent;
+            uiYposSliderHu.ValueChanged += UpdateUIEvent;
+            uiYposSliderTo.ValueChanged += UpdateUIEvent;
+
+            UpdateUI();
+            UpdateUINames();
 
             #endregion
         }
@@ -514,7 +652,7 @@ namespace Slav_Menu
                     prop = World.CreateProp(propModel, Game.Player.Character.Position, false, false);
                     propLoaded = true;
                     loadProp = false;
-                    UpdateProp();
+                    UpdatePedProp();
                 }
                 else
                 {
@@ -524,7 +662,7 @@ namespace Slav_Menu
                         prop = World.CreateProp(propModel, Game.Player.Character.Position, false, false);
                         propLoaded = true;
                         loadProp = false;
-                        UpdateProp();
+                        UpdatePedProp();
                     }
                     else
                     {
@@ -535,7 +673,7 @@ namespace Slav_Menu
                             prop = World.CreateProp(propModel, Game.Player.Character.Position, false, false);
                             propLoaded = true;
                             loadProp = false;
-                            UpdateProp();
+                            UpdatePedProp();
                         }
                         else
                         {
@@ -854,7 +992,55 @@ namespace Slav_Menu
                     }
                 }
             }
-            playingItem.Title = "Playing: ~g~" + playingMusicEvent;
+            if (musicEventMenu.Visible)
+            {
+                playingItem.Title = "Playing: ~g~" + playingMusicEvent;
+            }
+
+            #endregion
+
+            #region UIPositionTick
+
+            if (!shapeMenuUpdated)
+            {
+                switch (shapeType)
+                {
+                    case 0:
+                        {
+                            uiTextureDictItem.Enabled = false;
+                            uiTextureNameItem.Enabled = false;
+                        }
+                        break;
+                    case 1:
+                        {
+                            uiTextureDictItem.Enabled = true;
+                            uiTextureNameItem.Enabled = true;
+                        }
+                        break;
+                }
+                shapeMenuUpdated = true;
+            }
+            else if (renderShape)
+            {
+                switch (shapeType)
+                {
+                    case 0:
+                        {
+                            Function.Call(Hash.DRAW_RECT, shapeXpos, shapeYpos, shapeWidth, shapeLength, 255, 0, 0, 255, false);
+                        }
+                        break;
+                    case 1:
+                        {
+                            Function.Call(Hash.DRAW_SPRITE, uiTextureDict, uiTextureName, shapeXpos, shapeYpos, shapeWidth, shapeLength, 0f, 255, 0, 0, 255, false, 0);
+                        }
+                        break;
+                }
+            }
+            if (hideHud)
+            {
+                Function.Call(Hash.DISPLAY_RADAR, false);
+                Function.Call(Hash.DISPLAY_HUD, false);
+            }
 
             #endregion
         }
@@ -862,42 +1048,49 @@ namespace Slav_Menu
         {
             if (e.KeyCode == menuOpenKey)
             {
-                if (!mainMenu.Visible && !pedPropMenu.Visible && !adjustmentMenu.Visible && !musicEventMenu.Visible && !missionMenu.Visible && !strangersAndFreaksMenu.Visible && !randomEventsMenu.Visible && !activitiesMenu.Visible && !onlineContentMenu.Visible && !miscellaneousMenu.Visible)
+                if (!mainMenu.Visible &&
+                    !pedPropMenu.Visible &&
+                    !adjustmentMenu.Visible &&
+                    !musicEventMenu.Visible &&
+                    !missionMenu.Visible &&
+                    !strangersAndFreaksMenu.Visible &&
+                    !randomEventsMenu.Visible &&
+                    !activitiesMenu.Visible &&
+                    !onlineContentMenu.Visible &&
+                    !miscellaneousMenu.Visible &&
+                    !uiPosMenu.Visible &&
+                    !shapeMenu.Visible &&
+                    !uiAdjustmentMenu.Visible)
                 {
                     mainMenu.Visible = true;
-                } else if (mainMenu.Visible || pedPropMenu.Visible || adjustmentMenu.Visible || musicEventMenu.Visible || missionMenu.Visible || strangersAndFreaksMenu.Visible || randomEventsMenu.Visible || activitiesMenu.Visible && onlineContentMenu.Visible || miscellaneousMenu.Visible)
+                } 
+                else if (mainMenu.Visible ||
+                    pedPropMenu.Visible ||
+                    adjustmentMenu.Visible ||
+                    musicEventMenu.Visible ||
+                    missionMenu.Visible ||
+                    strangersAndFreaksMenu.Visible ||
+                    randomEventsMenu.Visible ||
+                    activitiesMenu.Visible ||
+                    onlineContentMenu.Visible ||
+                    miscellaneousMenu.Visible ||
+                    uiPosMenu.Visible ||
+                    shapeMenu.Visible ||
+                    uiAdjustmentMenu.Visible)
                 {
-                    if (mainMenu.Visible)
-                    {
-                        mainMenu.Visible = false;
-                    } else if (pedPropMenu.Visible)
-                    {
-                        pedPropMenu.Visible = false;
-                    } else if (adjustmentMenu.Visible)
-                    {
-                        adjustmentMenu.Visible = false;
-                    } else if (musicEventMenu.Visible)
-                    {
-                        musicEventMenu.Visible = false;
-                    } else if (missionMenu.Visible)
-                    {
-                        missionMenu.Visible = false;
-                    } else if (strangersAndFreaksMenu.Visible)
-                    {
-                        strangersAndFreaksMenu.Visible = false;
-                    } else if (randomEventsMenu.Visible)
-                    {
-                        randomEventsMenu.Visible = false;
-                    } else if (activitiesMenu.Visible)
-                    {
-                        activitiesMenu.Visible = false;
-                    } else if (onlineContentMenu.Visible)
-                    {
-                        onlineContentMenu.Visible = false;
-                    } else if (miscellaneousMenu.Visible)
-                    {
-                        miscellaneousMenu.Visible = false;
-                    }
+                    if (mainMenu.Visible) mainMenu.Visible = false;
+                    else if (pedPropMenu.Visible) pedPropMenu.Visible = false;
+                    else if (adjustmentMenu.Visible) adjustmentMenu.Visible = false;
+                    else if (musicEventMenu.Visible) musicEventMenu.Visible = false;
+                    else if (missionMenu.Visible) missionMenu.Visible = false;
+                    else if (strangersAndFreaksMenu.Visible) strangersAndFreaksMenu.Visible = false;
+                    else if (randomEventsMenu.Visible) randomEventsMenu.Visible = false;
+                    else if (activitiesMenu.Visible) activitiesMenu.Visible = false;
+                    else if (onlineContentMenu.Visible) onlineContentMenu.Visible = false;
+                    else if (miscellaneousMenu.Visible) miscellaneousMenu.Visible = false;
+                    else if (uiPosMenu.Visible) uiPosMenu.Visible = false;
+                    else if (shapeMenu.Visible) shapeMenu.Visible = false;
+                    else if (uiAdjustmentMenu.Visible) uiAdjustmentMenu.Visible = false;
                 }
             }
             if (e.KeyCode == clipboardKey)
@@ -907,7 +1100,7 @@ namespace Slav_Menu
                     Clipboard.setText(clipboardText);
                     if (notifEnabled)
                     {
-                        Notification.Show("~g~Position and Rotation copied to clipboard");
+                        Notification.Show("~g~Values copied to clipboard");
                     }
                 }
                 else
@@ -930,6 +1123,7 @@ namespace Slav_Menu
         }
 
         #region PedPropAllignFunc
+
         private void InputProp(object sender, EventArgs e)
         {
             propInput = Game.GetUserInput();
@@ -945,7 +1139,7 @@ namespace Slav_Menu
             }
             Notification.Show("Prop ~g~" + propInput + " ~s~Selected");
             loadModel = true;
-            UpdateProp();
+            UpdatePedProp();
         }
         private void InputBone(object sender, EventArgs e)
         {
@@ -958,7 +1152,7 @@ namespace Slav_Menu
             {
                 Notification.Show("~r~Only integer values allowed");
             }
-            UpdateProp();
+            UpdatePedProp();
         }
         private void InputVertex(object sender, EventArgs e)
         {
@@ -971,7 +1165,7 @@ namespace Slav_Menu
             {
                 Notification.Show("~r~Only integer values allowed");
             }
-            UpdateProp();
+            UpdatePedProp();
         }
         private void InputSoftPinning(object sender, EventArgs e)
         {
@@ -992,20 +1186,20 @@ namespace Slav_Menu
         private void InputXInvert(object sender, EventArgs e)
         {
             xInvert = !xInvert;
-            UpdateProp();
-            UpdateNames();
+            UpdatePedProp();
+            UpdatePedPropNames();
         }
         private void InputYInvert(object sender, EventArgs e)
         {
             yInvert = !yInvert;
-            UpdateProp();
-            UpdateNames();
+            UpdatePedProp();
+            UpdatePedPropNames();
         }
         private void InputZInvert(object sender, EventArgs e)
         {
             zInvert = !zInvert;
-            UpdateProp();
-            UpdateNames();
+            UpdatePedProp();
+            UpdatePedPropNames();
         }
         private void InputAdd(object sender, EventArgs e)
         {
@@ -1035,127 +1229,12 @@ namespace Slav_Menu
                 Notification.Show("~o~Prop not loaded, nothing to delete");
             }
         }
-        private void InputXPosSlider(object sender, EventArgs e)
+        private void UpdatePedPropEvent(object sender, EventArgs e)
         {
-            UpdateProp();
-            UpdateNames();
+            UpdatePedProp();
+            UpdatePedPropNames();
         }
-        private void InputYPosSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputZPosSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputXPosTeSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputYPosTeSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputZPosTeSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputXPosHuSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputYPosHuSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputZPosHuSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputXPosToSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputYPosToSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputZPosToSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            UpdateNames();
-        }
-        private void InputXRotSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            xRotSlider.Title = "X Rotation: " + xRotSlider.Value;
-        }
-        private void InputYRotSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            yRotSlider.Title = "Y Rotation: " + yRotSlider.Value;
-        }
-        private void InputZRotSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            zRotSlider.Title = "Z Rotation: " + zRotSlider.Value;
-        }
-        private void InputXRotTeSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            xRotSliderTe.Title = "X Rotation Tenth: " + xRotSliderTe.Value;
-        }
-        private void InputYRotTeSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            yRotSliderTe.Title = "Y Rotation Tenth: " + yRotSliderTe.Value;
-        }
-        private void InputZRotTeSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            zRotSliderTe.Title = "Z Rotation Tenth: " + zRotSliderTe.Value;
-        }
-        private void InputXRotHuSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            xRotSliderHu.Title = "X Rotation Hundredth: " + xRotSliderHu.Value;
-        }
-        private void InputYRotHuSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            yRotSliderHu.Title = "Y Rotation Hundredth: " + yRotSliderHu.Value;
-        }
-        private void InputZRotHuSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            zRotSliderHu.Title = "Z Rotation Hundredth: " + zRotSliderHu.Value;
-        }
-        private void InputXRotToSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            xRotSliderTo.Title = "X Rotation Thousandth: " + xRotSliderTo.Value;
-        }
-        private void InputYRotToSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            yRotSliderTo.Title = "Y Rotation Thousandth: " + yRotSliderTo.Value;
-        }
-        private void InputZRotToSlider(object sender, EventArgs e)
-        {
-            UpdateProp();
-            zRotSliderTo.Title = "Z Rotation Thousandth: " + zRotSliderTo.Value;
-        }
-        void UpdateNames()
+        private void UpdatePedPropNames()
         {
             if (xInvert)
             {
@@ -1199,8 +1278,20 @@ namespace Slav_Menu
                 zPosSliderHu.Title = "Z Position Hundredth: " + zPosSliderHu.Value;
                 zPosSliderTo.Title = "Z Position Thousandth: " + zPosSliderTo.Value;
             }
+            xRotSlider.Title = "X Rotation: " + xRotSlider.Value;
+            xRotSliderTe.Title = "X Rotation Tenth: " + xRotSliderTe.Value;
+            xRotSliderHu.Title = "X Rotation Hundredth: " + xRotSliderHu.Value;
+            xRotSliderTo.Title = "X Rotation Thousandth: " + xRotSliderTo.Value;
+            yRotSlider.Title = "Y Rotation: " + yRotSlider.Value;
+            yRotSliderTe.Title = "Y Rotation Tenth: " + yRotSliderTe.Value;
+            yRotSliderHu.Title = "Y Rotation Hundredth: " + yRotSliderHu.Value;
+            yRotSliderTo.Title = "Y Rotation Thousandth: " + yRotSliderTo.Value;
+            zRotSlider.Title = "Z Rotation: " + zRotSlider.Value;
+            zRotSliderTe.Title = "Z Rotation Tenth: " + zRotSliderTe.Value;
+            zRotSliderHu.Title = "Z Rotation Hundredth: " + zRotSliderHu.Value;
+            zRotSliderTo.Title = "Z Rotation Thousandth: " + zRotSliderTo.Value;
         }
-        void UpdateProp()
+        private void UpdatePedProp()
         {
             propXpos = xPosSlider.Value + (xPosSliderTe.Value * 0.1f) + (xPosSliderHu.Value * 0.01f) + (xPosSliderTo.Value * 0.001f);
             propYpos = yPosSlider.Value + (yPosSliderTe.Value * 0.1f) + (yPosSliderHu.Value * 0.01f) + (yPosSliderTo.Value * 0.001f);
@@ -1220,12 +1311,13 @@ namespace Slav_Menu
             {
                 propZpos = -propZpos;
             }
-            clipboardText = "X Pos: " + propXpos + ", Prop Y Pos: " + propYpos + ", Prop Z Pos: " + propZpos + ", Prop X Rot: " + propXrot + ", Prop Y Rot: " + propYrot + ", Prop Z Rot: " + propZrot;
+            clipboardText = "Prop X Pos: " + propXpos + ", Prop Y Pos: " + propYpos + ", Prop Z Pos: " + propZpos + ", Prop X Rot: " + propXrot + ", Prop Y Rot: " + propYrot + ", Prop Z Rot: " + propZrot;
             if (propLoaded)
             {
                 Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, prop, Game.Player.Character, boneIndex, propXpos, propYpos, propZpos, propXrot, propYrot, propZrot, 0, softPinning, collision, isPed, vertex, fixedRot);
             }
         }
+
         #endregion
 
         #region MusicEventFunc
@@ -1420,6 +1512,100 @@ namespace Slav_Menu
             {
                 Function.Call(Hash.STOP_AUDIO_SCENE, "END_CREDITS_SCENE");
             }
+        }
+
+        #endregion
+
+        #region UIPositionFunc
+
+        private void RenderUIShape(object sender, EventArgs e)
+        {
+            renderShape = uiRenderItem.Checked;
+            if (hideHudSetting)
+            {
+                if (uiRenderItem.Checked)
+                {
+                    hideHud = true;
+                }
+                else
+                {
+                    hideHud = false;
+                    Function.Call(Hash.DISPLAY_RADAR, true);
+                    Function.Call(Hash.DISPLAY_HUD, true);
+                }
+            }
+        }
+        private void UpdateShape(object sender, ItemChangedEventArgs<string> e)
+        {
+            if (shapeType != e.Index)
+            {
+                shapeType = e.Index;
+                shapeMenuUpdated = false;
+            }
+        }
+        private void UpdateUIEvent(object sender, EventArgs e)
+        {
+            UpdateUI();
+            UpdateUINames();
+        }
+        private void UpdateUITextureDict(object sender, EventArgs e)
+        {
+            if ((uiTextureDict != null) && (uiTextureDict != ""))
+            {
+                Function.Call(Hash.SET_STREAMED_TEXTURE_DICT_AS_NO_LONGER_NEEDED, uiTextureDict);
+            }
+            uiTextureDict = Game.GetUserInput();
+            Function.Call(Hash.REQUEST_STREAMED_TEXTURE_DICT, uiTextureDict, false);
+            if (notifEnabled)
+            {
+                gameTimeOffset = Game.GameTime + 5000;
+                while (!Function.Call<bool>(Hash.HAS_STREAMED_TEXTURE_DICT_LOADED, uiTextureDict))
+                {
+                    if (Game.GameTime > gameTimeOffset)
+                    {
+                        uiTextureDictItem.Title = "Texture Dictionary: ";
+                        Notification.Show("~r~" + uiTextureDict + " ~s~could not be loaded. It may be invalid.");
+                        break;
+                    }
+                    Wait(10);
+                }
+                if (Game.GameTime < gameTimeOffset)
+                {
+                    uiTextureDictItem.Title = "Texture Dictionary: " + uiTextureDict;
+                    Notification.Show("~g~" + uiTextureDict + " ~s~was successfully loaded.");
+                }
+            }
+        }
+        private void UpdateUITextureName(object sender, EventArgs e)
+        {
+            uiTextureName = Game.GetUserInput();
+        }
+        private void UpdateUINames()
+        {
+            uiWidthSlider.Title = "Width: " + uiWidthSlider.Value;
+            uiWidthSliderTe.Title = "Width Tenth: " + uiWidthSliderTe.Value;
+            uiWidthSliderHu.Title = "Width Hundredth: " + uiWidthSliderHu.Value;
+            uiWidthSliderTo.Title = "Width Thousandth: " + uiWidthSliderTo.Value;
+            uiLengthSlider.Title = "Length: " + uiLengthSlider.Value;
+            uiLengthSliderTe.Title = "Length Tenth: " + uiLengthSliderTe.Value;
+            uiLengthSliderHu.Title = "Length Hundredth: " + uiLengthSliderHu.Value;
+            uiLengthSliderTo.Title = "Length Thousandth: " + uiLengthSliderTo.Value;
+            uiXposSlider.Title = "X Position: " + uiXposSlider.Value;
+            uiXposSliderTe.Title = "X Position Tenth: " + uiXposSliderTe.Value;
+            uiXposSliderHu.Title = "X Position Hundredth: " + uiXposSliderHu.Value;
+            uiXposSliderTo.Title = "X Position Thousandth: " + uiXposSliderTo.Value;
+            uiYposSlider.Title = "Y Position: " + uiYposSlider.Value;
+            uiYposSliderTe.Title = "Y Position Tenth: " + uiYposSliderTe.Value;
+            uiYposSliderHu.Title = "Y Position Hundredth: " + uiYposSliderHu.Value;
+            uiYposSliderTo.Title = "Y Position Thousandth: " + uiYposSliderTo.Value;
+        }
+        private void UpdateUI()
+        {
+            shapeXpos = uiXposSlider.Value + (uiXposSliderTe.Value * 0.1f) + (uiXposSliderHu.Value * 0.01f) + (uiXposSliderTo.Value * 0.001f);
+            shapeYpos = uiYposSlider.Value + (uiYposSliderTe.Value * 0.1f) + (uiYposSliderHu.Value * 0.01f) + (uiYposSliderTo.Value * 0.001f);
+            shapeWidth = uiWidthSlider.Value + (uiWidthSliderTe.Value * 0.1f) + (uiWidthSliderHu.Value * 0.01f) + (uiWidthSliderTo.Value * 0.001f);
+            shapeLength = uiLengthSlider.Value + (uiLengthSliderTe.Value * 0.1f) + (uiLengthSliderHu.Value * 0.01f) + (uiLengthSliderTo.Value * 0.001f);
+            clipboardText = "UI Width: " + shapeWidth + ", UI Length: " + shapeLength + ", UI X Pos: " + shapeXpos + ", UI Y Pos: " + shapeYpos;
         }
 
         #endregion
