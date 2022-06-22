@@ -1571,14 +1571,47 @@ namespace Slav_Menu
                 }
                 if (Game.GameTime < gameTimeOffset)
                 {
-                    uiTextureDictItem.Title = "Texture Dictionary: " + uiTextureDict;
+                    uiTextureDictItem.Title = "Texture Dictionary: ~g~" + uiTextureDict;
                     Notification.Show("~g~" + uiTextureDict + " ~s~was successfully loaded.");
+                }
+            }
+            else
+            {
+                gameTimeOffset = Game.GameTime + 5000;
+                while (!Function.Call<bool>(Hash.HAS_STREAMED_TEXTURE_DICT_LOADED, uiTextureDict))
+                {
+                    if (Game.GameTime > gameTimeOffset)
+                    {
+                        uiTextureDictItem.Title = "Texture Dictionary: ";
+                        break;
+                    }
+                    Wait(10);
+                }
+                if (Game.GameTime < gameTimeOffset)
+                {
+                    uiTextureDictItem.Title = "Texture Dictionary: ~g~" + uiTextureDict;
                 }
             }
         }
         private void UpdateUITextureName(object sender, EventArgs e)
         {
-            uiTextureName = Game.GetUserInput();
+            if ((uiTextureDictItem.Title != "Texture Dictionary: ") && (uiTextureDictItem.Title != null))
+            {
+                uiTextureName = Game.GetUserInput();
+                if (notifEnabled)
+                {
+                    uiTextureNameItem.Title = "Texture Name: ~g~" + uiTextureName;
+                    Notification.Show("~g~" + uiTextureName + " ~s~has been selected.");
+                }
+            }
+            else
+            {
+                uiTextureNameItem.Title = "Texture Name: ";
+                if (notifEnabled)
+                {
+                    Notification.Show("~r~Please select a valid texture dictionary before selecting a texture.");
+                }
+            }
         }
         private void UpdateUINames()
         {
