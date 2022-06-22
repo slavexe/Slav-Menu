@@ -28,11 +28,11 @@ Below are the requirements for Slav Menu to work:
 - Download and install the latest versions of Script Hook V, Script Hook V .NET, and LemonUI  
 - Download the latest version of Json.NET and place **Newtonsoft.Json.dll** as well as **Newtonsoft.Json.xml** in your scripts folder  
 - Download the latest versions of **Slav Menu.dll**, **MusicEventData.json**, and **Slav_Menu_Settings.ini** from [Releases](https://github.com/slavexe/Slav-Menu/releases) and place them in your scripts folder  
-- Any .pdb files are optional and are only used for giving error reports if a script were to crash
 ## Information
-- Most music events are sourced from [GTA V Data Dumps](https://github.com/DurtyFree/gta-v-data-dumps), however some music events are not found in the music event data dump because Rockstar implemented them in a way that causes difficulty in automatically detecting them   
-- Mission names, Strangers and Freaks names, DLC names, etc. can be looked up on [GTA Base](https://www.gtabase.com/)  
-- Ped bone indices for use in Ped Prop Align Tool can be found on the [RAGE Multiplayer Wiki](https://wiki.rage.mp/index.php?title=Bones)  
+- Most music events are sourced from [GTA V Data Dumps](https://github.com/DurtyFree/gta-v-data-dumps), however some music events are not found in the music event data dump because Rockstar implemented them in a way that causes difficulty in automatically detecting them.   
+- Mission names, Strangers and Freaks names, DLC names, etc. can be looked up on [GTA Base](https://www.gtabase.com/).    
+- Ped bone indices for use in Ped Prop Align Tool can be found on the [RAGE Multiplayer Wiki](https://wiki.rage.mp/index.php?title=Bones).    
 ## Contributing
 Anyone is welcome to submit pull requests to refine music event names or to add new music events.
-The menu will automatically create submenus and items for any additional music events, therefore all that needs to be modified is [MusicEventData.json](./Slav%20Menu/MusicEventData.json).
+The menu will automatically create submenus and items for any additional music events, therefore all that needs to be modified is [MusicEventData.json](./Slav%20Menu/MusicEventData.json).  
+Please visit [Discussions](https://github.com/slavexe/Slav-Menu/discussions) for more information or to discuss changes.
