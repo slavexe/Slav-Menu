@@ -30,7 +30,7 @@ Below are the requirements for Slav Menu to work:
 - [Json.NET](https://github.com/JamesNK/Newtonsoft.Json)
 ## Installation
 - Download and install the latest versions of Script Hook V, Script Hook V .NET, and LemonUI  
-- Download the latest version of Json.NET and place **Newtonsoft.Json.dll** as well as **Newtonsoft.Json.xml** in your scripts folder  
+- Download the latest version of Json.NET and place **Newtonsoft.Json.dll** as well as **Newtonsoft.Json.xml** in your scripts folder. Make sure to use files from the /Bin/net45 subdirectory upon extracting the downloadable archive.    
 - Download the latest versions of **Slav Menu.dll**, **MusicEventData.json**, and **Slav_Menu_Settings.ini** from [Releases](https://github.com/slavexe/Slav-Menu/releases) and place them in your scripts folder  
 ## Information
 - Most music events are sourced from [GTA V Data Dumps](https://github.com/DurtyFree/gta-v-data-dumps), however some music events are not found in the music event data dump because Rockstar implemented them in a way that causes difficulty in automatically detecting them.   
