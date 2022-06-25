@@ -18,6 +18,10 @@ The music events are categorized as follows:
 A tool that can attach any prop to any ped and adjust the position and rotation of that prop relative to the ped bone it was mounted to.
 This can be used for many things, for example perfectly aligning a drill into a ped's hand to make it look as if they are holding it.
 When a desired position and rotation are selected one can effortlessly copy them to their clipboard and use them in their projects.
+## UI Position Tool
+![Image Not Available](https://user-images.githubusercontent.com/69091521/175128927-7e14a7ac-ddcc-4939-8134-db3e4bcb3346.png)  
+
+A tool that can render any texture (or just a rectangle) on the screen while adjusting its size and position. This is designed to help fine tune where UI elements should be placed without having to constantly guess and check their optimal positions.
 ## Requirements 
 Below are the requirements for Slav Menu to work:
 - [Script Hook V](http://www.dev-c.com/gtav/scripthookv/)
