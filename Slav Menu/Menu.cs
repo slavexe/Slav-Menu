@@ -1506,10 +1506,14 @@ namespace Slav_Menu
         {
             if (disableAmbientItem.Checked)
             {
+                Function.Call(Hash.SET_AUDIO_FLAG, "DisableFlightMusic", true);
+                Function.Call(Hash.SET_AUDIO_FLAG, "WantedMusicDisabled", true);
                 Function.Call(Hash.START_AUDIO_SCENE, "END_CREDITS_SCENE");
             }
             else
             {
+                Function.Call(Hash.SET_AUDIO_FLAG, "DisableFlightMusic", false);
+                Function.Call(Hash.SET_AUDIO_FLAG, "WantedMusicDisabled", false);
                 Function.Call(Hash.STOP_AUDIO_SCENE, "END_CREDITS_SCENE");
             }
         }
