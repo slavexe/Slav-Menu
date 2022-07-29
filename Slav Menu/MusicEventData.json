@@ -1945,6 +1945,10 @@
             "EventHash": "FBI5A_CUT_PIPE_END"
           },
           {
+            "EventName": "Cut Swim Up",
+            "EventHash": "FBI5A_CUT_SWIM_UP"
+          },
+          {
             "EventName": "Swim Up",
             "EventHash": "FBI5A_SWIM_UP"
           },
@@ -6501,34 +6505,6 @@
             "EventHash": "MP_MC_GR_START"
           },
           {
-            "EventName": "LS Tuners Start",
-            "EventHash": "MP_MC_TUNER_START_MUSIC"
-          },
-          {
-            "EventName": "LS Tuners Stop",
-            "EventHash": "MP_MC_TUNER_STOP_MUSIC"
-          },
-          {
-            "EventName": "LS Tuners Failed",
-            "EventHash": "MP_MC_TUNER_FAIL"
-          },
-          {
-            "EventName": "The Contract Start",
-            "EventHash": "MP_MC_FIXER_START_MUSIC"
-          },
-          {
-            "EventName": "The Contract Holdout Start",
-            "EventHash": "MP_MC_FIXER_HOLDOUT_START"
-          },
-          {
-            "EventName": "The Contract Stop",
-            "EventHash": "MP_MC_FIXER_STOP_MUSIC"
-          },
-          {
-            "EventName": "The Contractc Fail",
-            "EventHash": "MP_MC_FIXER_FAIL"
-          },
-          {
             "EventName": "Radio Fade",
             "EventHash": "MP_MC_RADIO_FADE"
           },
@@ -7158,6 +7134,23 @@
         ]
       },
       {
+        "ContentName": "Los Santos Tuners (DLC)",
+        "ContentEvents": [
+          {
+            "EventName": "LS Tuners Start",
+            "EventHash": "MP_MC_TUNER_START_MUSIC"
+          },
+          {
+            "EventName": "LS Tuners Stop",
+            "EventHash": "MP_MC_TUNER_STOP_MUSIC"
+          },
+          {
+            "EventName": "LS Tuners Failed",
+            "EventHash": "MP_MC_TUNER_FAIL"
+          }
+        ]
+      },
+      {
         "ContentName": "Lowriders (DLC)",
         "ContentEvents": [
           {
@@ -7174,32 +7167,8 @@
         "ContentName": "The Contract (DLC)",
         "ContentEvents": [
           {
-            "EventName": "On Course Start",
-            "EventHash": "DATA_LEAK_GOLF_START_MUSIC"
-          },
-          {
-            "EventName": "Nightlife Leak Start",
-            "EventHash": "DATA_LEAK_PARTY_PROMO_START_MUSIC"
-          },
-          {
-            "EventName": "High Society Leak Start",
-            "EventHash": "DATA_LEAK_BILLIONAIRE_START_MUSIC"
-          },
-          {
-            "EventName": "High Society Leak Force Radio",
-            "EventHash": "DATA_LEAK_BILLIONAIRE_FORCE_RADIO"
-          },
-          {
-            "EventName": "South Central Leak Start",
-            "EventHash": "DATA_LEAK_HOOD_PASS_START_MUSIC"
-          },
-          {
-            "EventName": "Studio Time Shootout Start",
-            "EventHash": "FITB_SHOOTOUT_TRACK_START"
-          },
-          {
-            "EventName": "Studio Time Shootout Stop",
-            "EventHash": "FITB_SHOOTOUT_TRACK_STOP"
+            "EventName": "Data Recovery Start",
+            "EventHash": "DATA_LEAK_FIRE_START_MUSIC"
           },
           {
             "EventName": "Don't Fuck With Dre Start",
@@ -7216,6 +7185,79 @@
           {
             "EventName": "Don't Fuck With Dre Cutscene Track Stop",
             "EventHash": "DFWD_CS_TIMED_TRACK_STOP"
+          },
+          {
+            "EventName": "High Society Leak Start",
+            "EventHash": "DATA_LEAK_BILLIONAIRE_START_MUSIC"
+          },
+          {
+            "EventName": "High Society Leak Force Radio",
+            "EventHash": "DATA_LEAK_BILLIONAIRE_FORCE_RADIO"
+          },
+          {
+            "EventName": "Nightlife Leak Start",
+            "EventHash": "DATA_LEAK_PARTY_PROMO_START_MUSIC"
+          },
+          {
+            "EventName": "On Course Start",
+            "EventHash": "DATA_LEAK_GOLF_START_MUSIC"
+          },
+          {
+            "EventName": "Seed Capital Mule Song Start",
+            "EventHash": "MP_SEED_CAPITAL_MULE_SONG_START"
+          },
+          {
+            "EventName": "South Central Leak Start",
+            "EventHash": "DATA_LEAK_HOOD_PASS_START_MUSIC"
+          },
+          {
+            "EventName": "Studio Time Shootout Start",
+            "EventHash": "FITB_SHOOTOUT_TRACK_START"
+          },
+          {
+            "EventName": "Studio Time Shootout Stop",
+            "EventHash": "FITB_SHOOTOUT_TRACK_STOP"
+          },
+          {
+            "EventName": "The Contract Start",
+            "EventHash": "MP_MC_FIXER_START_MUSIC"
+          },
+          {
+            "EventName": "The Contract Holdout Start",
+            "EventHash": "MP_MC_FIXER_HOLDOUT_START"
+          },
+          {
+            "EventName": "The Contract Stop",
+            "EventHash": "MP_MC_FIXER_STOP_MUSIC"
+          },
+          {
+            "EventName": "The Contract Fail",
+            "EventHash": "MP_MC_FIXER_FAIL"
+          }
+        ]
+      },
+      {
+        "ContentName": "The Criminal Enterprises (DLC)",
+        "ContentEvents": [
+          {
+            "EventName": "Intro Start",
+            "EventHash": "ULP_INTRO_START_MUSIC"
+          },
+          {
+            "EventName": "Intro Stop",
+            "EventHash": "ULP_INTRO_STOP_MUSIC"
+          },
+          {
+            "EventName": "Start Mission",
+            "EventHash": "MP_MC_MPSUM2_START_MUSIC"
+          },
+          {
+            "EventName": "Stop Mission",
+            "EventHash": "MP_MC_MPSUM2_STOP_MUSIC"
+          },
+          {
+            "EventName": "Mission Failed",
+            "EventHash": "MP_MC_MPSUM2_FAIL"
           }
         ]
       },
@@ -7499,7 +7541,7 @@
         "OtherName": "Radio Songs",
         "OtherEvents": [
           {
-            "EventName": "Kenny Loggins - Danger Zone",
+            "EventName": "Danger Zone - Kenny Loggins",
             "EventHash": "MP_MC_DANGERZONE"
           },
           {
@@ -7509,6 +7551,10 @@
           {
             "EventName": "Danger Zone Fade In",
             "EventHash": "MP_MC_DZ_FIRA"
+          },
+          {
+            "EventName": "Debunked - Metz",
+            "EventHash": "BA_METZ_DEBUNKED"
           }
         ]
       }
