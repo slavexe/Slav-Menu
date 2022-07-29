@@ -232,12 +232,30 @@ namespace Slav_Menu
 
         private MusicEventStorage jsonOutput;
 
-        private NativeMenu missionMenu = new NativeMenu("Music Event Player", "Missions");
-        private NativeMenu strangersAndFreaksMenu = new NativeMenu("Music Event Player", "Strangers And Freaks");
-        private NativeMenu randomEventsMenu = new NativeMenu("Music Event Player", "Random Events & Side Missions");
-        private NativeMenu activitiesMenu = new NativeMenu("Music Event Player", "Businesses & Activities");
-        private NativeMenu onlineContentMenu = new NativeMenu("Music Event Player", "Online Content");
-        private NativeMenu miscellaneousMenu = new NativeMenu("Music Event Player", "Miscellaneous");
+        private NativeMenu missionMenu = new NativeMenu("Music Event Player", "Missions")
+        {
+            Width = 450,
+        };
+        private NativeMenu strangersAndFreaksMenu = new NativeMenu("Music Event Player", "Strangers And Freaks")
+        {
+            Width = 450,
+        };
+        private NativeMenu randomEventsMenu = new NativeMenu("Music Event Player", "Random Events & Side Missions")
+        {
+            Width = 450,
+        };
+        private NativeMenu activitiesMenu = new NativeMenu("Music Event Player", "Businesses & Activities")
+        {
+            Width = 450,
+        };
+        private NativeMenu onlineContentMenu = new NativeMenu("Music Event Player", "Online Content")
+        {
+            Width = 550,
+        };
+        private NativeMenu miscellaneousMenu = new NativeMenu("Music Event Player", "Miscellaneous")
+        {
+            Width = 450,
+        };
         private NativeMenu currentMenu = new NativeMenu("PlaceHolder");
 
         private List<NativeMenu> missionMenuList = new List<NativeMenu>();
@@ -992,6 +1010,10 @@ namespace Slav_Menu
                     }
                 }
             }
+            else
+            {
+                currentMenu.Width = 500;
+            }
             if (musicEventMenu.Visible)
             {
                 playingItem.Title = "Playing: ~g~" + playingMusicEvent;
@@ -1060,7 +1082,8 @@ namespace Slav_Menu
                     !miscellaneousMenu.Visible &&
                     !uiPosMenu.Visible &&
                     !shapeMenu.Visible &&
-                    !uiAdjustmentMenu.Visible)
+                    !uiAdjustmentMenu.Visible &&
+                    !currentMenu.Visible)
                 {
                     mainMenu.Visible = true;
                 } 
@@ -1076,7 +1099,8 @@ namespace Slav_Menu
                     miscellaneousMenu.Visible ||
                     uiPosMenu.Visible ||
                     shapeMenu.Visible ||
-                    uiAdjustmentMenu.Visible)
+                    uiAdjustmentMenu.Visible ||
+                    currentMenu.Visible)
                 {
                     if (mainMenu.Visible) mainMenu.Visible = false;
                     else if (pedPropMenu.Visible) pedPropMenu.Visible = false;
@@ -1091,6 +1115,7 @@ namespace Slav_Menu
                     else if (uiPosMenu.Visible) uiPosMenu.Visible = false;
                     else if (shapeMenu.Visible) shapeMenu.Visible = false;
                     else if (uiAdjustmentMenu.Visible) uiAdjustmentMenu.Visible = false;
+                    else if (currentMenu.Visible) currentMenu.Visible = false;
                 }
             }
             if (e.KeyCode == clipboardKey)
@@ -1415,7 +1440,9 @@ namespace Slav_Menu
             {
                 Notification.Show("Playing ~g~" + eventName + " ~s~(~y~" + eventHash + "~s~) from ~o~" + missionName + "~s~.");
             }
+            clipboardText = "Event Name: " + eventName + ", Event Hash: " + eventHash;
             playingMusicEvent = eventHash;
+            Function.Call(Hash.PREPARE_MUSIC_EVENT, eventHash);
             Function.Call(Hash.TRIGGER_MUSIC_EVENT, eventHash);
         }
         private void SearchMusicEvent(object sender, EventArgs e)
