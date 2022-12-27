@@ -7134,6 +7134,47 @@
         ]
       },
       {
+        "ContentName": "Los Santos Drug Wars (DLC)",
+        "ContentEvents": [
+          {
+            "EventName": "Los Santos Drug Wars Start",
+            "EventHash": "MP_MC_CM22_START_MUSIC"
+          },
+          {
+            "EventName": "Dax Closing Cutscene Start",
+            "EventHash": "CM22_DAX_CLOSING_CS"
+          },
+          {
+            "EventName": "Rehab Trip Start",
+            "EventHash": "CM22_REHAB_TRIP_START"
+          },
+          {
+            "EventName": "Trip Start",
+            "EventHash": "MP_MC_CM22_TRIP_START_MUSIC"
+          },
+          {
+            "EventName": "Trip Stop",
+            "EventHash": "MP_MC_CM22_TRIP_STOP_MUSIC"
+          },
+          {
+            "EventName": "Trip Failed",
+            "EventHash": "MP_MC_CM22_TRIP_FAIL"
+          },
+          {
+            "EventName": "Los Santos Drug Wars Stop",
+            "EventHash": "MP_MC_CM22_STOP_MUSIC"
+          },
+          {
+            "EventName": "Los Santos Drug Wars Stop Alternative",
+            "EventHash": "MC_MC_CM22_STOP_MUSIC"
+          },
+          {
+            "EventName": "Los Santos Drug Wars Failed",
+            "EventHash": "MP_MC_CM22_FAIL"
+          }
+        ]
+      },
+      {
         "ContentName": "Los Santos Tuners (DLC)",
         "ContentEvents": [
           {

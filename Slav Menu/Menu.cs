@@ -223,6 +223,7 @@ namespace Slav_Menu
         #region MusicEventDeclarations
 
         private bool notifEnabled = true;
+        private bool disableAmbient = false;
         private bool currentMenuLoaded = false;
 
         private string currentMenuName;
@@ -265,10 +266,11 @@ namespace Slav_Menu
         private List<NativeMenu> onlineContentMenuList = new List<NativeMenu>();
         private List<NativeMenu> miscellaneousMenuList = new List<NativeMenu>();
 
-        private NativeItem searchItem = new NativeItem("Search Music Events");
+        private NativeItem searchItem = new NativeItem("Search Music Events", "Searches for any music event contained in MusicEventData and attemps to play it.");
+        private NativeItem manualPlayItem = new NativeItem("Play Music Event Manually", "Manually plays the music event entered without any checks to see if it exists. For experimental use.");
         private NativeItem playingItem = new NativeItem("");
 
-        private NativeCheckboxItem disableAmbientItem = new NativeCheckboxItem("Disable Ambience");
+        private NativeCheckboxItem disableAmbientItem = new NativeCheckboxItem("Disable Ambience", "Mutes all audio from surroundings and disables flight music and wanted music.");
 
         #endregion
 
@@ -388,6 +390,7 @@ namespace Slav_Menu
 
             notifEnabled = slavSettings.GetValue("General", "Notifications", true);
             hideHudSetting = slavSettings.GetValue("General", "HideHUD", true);
+            disableAmbient = slavSettings.GetValue("General", "DisableAmbientAudio", false);
 
             menuOpenKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("Keybinds", "OpenMenuKey", "F3"), true);
             clipboardKey = (Keys)Enum.Parse(typeof(Keys), slavSettings.GetValue("Keybinds", "CopyToClipboardKey", "NumPad0"), true);
@@ -511,11 +514,16 @@ namespace Slav_Menu
             musicEventMenu.AddSubMenu(onlineContentMenu);
             musicEventMenu.AddSubMenu(miscellaneousMenu);
             musicEventMenu.Add(searchItem);
+            musicEventMenu.Add(manualPlayItem);
             musicEventMenu.Add(disableAmbientItem);
             musicEventMenu.Add(playingItem);
 
             searchItem.Activated += SearchMusicEvent;
-            disableAmbientItem.Activated += DisableAmbientEvent;
+            manualPlayItem.Activated += ManualPlayMusicEvent;
+            disableAmbientItem.Activated += AmbientEventInvoker;
+
+            disableAmbientItem.Checked = disableAmbient;
+            DisableAmbientEvent();
 
             using (StreamReader jsonReader = new StreamReader("scripts\\MusicEventData.json"))
             {
@@ -1016,7 +1024,14 @@ namespace Slav_Menu
             }
             if (musicEventMenu.Visible)
             {
-                playingItem.Title = "Playing: ~g~" + playingMusicEvent;
+                if (Function.Call<bool>((Hash)0x845FFC3A4FEEFA3E))
+                {
+                    playingItem.Title = "Playing: ~g~" + playingMusicEvent;
+                }
+                else
+                {
+                    playingItem.Title = "Playing:";
+                }
             }
 
             #endregion
@@ -1142,7 +1157,6 @@ namespace Slav_Menu
                 {
                     Function.Call(Hash.TRIGGER_MUSIC_EVENT, "GLOBAL_KILL_MUSIC");
                     Notification.Show("Stopping \"~g~" + playingMusicEvent + "~s~\"");
-                    playingMusicEvent = "";
                 }
             }
         }
@@ -1349,88 +1363,107 @@ namespace Slav_Menu
        
         private void EventActivated(object sender, ItemActivatedArgs e)
         {
-            foreach (var mission in jsonOutput.Missions)
+            bool eventFound = false;
+            if (!eventFound)
             {
-                if (mission.MissionName == currentMenuName)
+                foreach (var mission in jsonOutput.Missions)
                 {
-                    foreach (var musicEvent in mission.MissionEvents)
+                    if (mission.MissionName == currentMenuName)
                     {
-                        if (e.Item.Title == musicEvent.EventName)
+                        foreach (var musicEvent in mission.MissionEvents)
                         {
-                            PlayMusicEvent(mission.MissionName, musicEvent.EventName, musicEvent.EventHash);
+                            if (e.Item.Title == musicEvent.EventName)
+                            {
+                                PlayMusicEvent(mission.MissionName, musicEvent.EventName, musicEvent.EventHash);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
-            foreach (var strangerAndFreak in jsonOutput.StrangersAndFreaks)
+            if (!eventFound)
             {
-                if (strangerAndFreak.StrangerAndFreakName == currentMenuName)
+                foreach (var strangerAndFreak in jsonOutput.StrangersAndFreaks)
                 {
-                    foreach (var musicEvent in strangerAndFreak.StrangerAndFreakEvents)
+                    if (strangerAndFreak.StrangerAndFreakName == currentMenuName)
                     {
-                        if (e.Item.Title == musicEvent.EventName)
+                        foreach (var musicEvent in strangerAndFreak.StrangerAndFreakEvents)
                         {
-                            PlayMusicEvent(strangerAndFreak.StrangerAndFreakName, musicEvent.EventName, musicEvent.EventHash);
+                            if (e.Item.Title == musicEvent.EventName)
+                            {
+                                PlayMusicEvent(strangerAndFreak.StrangerAndFreakName, musicEvent.EventName, musicEvent.EventHash);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
-            foreach (var randomEvent in jsonOutput.RandomEvents)
+            if (!eventFound)
             {
-                if (randomEvent.RandomEventName == currentMenuName)
+                foreach (var randomEvent in jsonOutput.RandomEvents)
                 {
-                    foreach (var musicEvent in randomEvent.RandomMusicEvents)
+                    if (randomEvent.RandomEventName == currentMenuName)
                     {
-                        if (e.Item.Title == musicEvent.EventName)
+                        foreach (var musicEvent in randomEvent.RandomMusicEvents)
                         {
-                            PlayMusicEvent(randomEvent.RandomEventName, musicEvent.EventName, musicEvent.EventHash);
+                            if (e.Item.Title == musicEvent.EventName)
+                            {
+                                PlayMusicEvent(randomEvent.RandomEventName, musicEvent.EventName, musicEvent.EventHash);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
-            foreach (var activity in jsonOutput.Activities)
+            if (!eventFound)
             {
-                if (activity.ActivityName == currentMenuName)
+                foreach (var activity in jsonOutput.Activities)
                 {
-                    foreach (var musicEvent in activity.ActivityEvents)
+                    if (activity.ActivityName == currentMenuName)
                     {
-                        if (e.Item.Title == musicEvent.EventName)
+                        foreach (var musicEvent in activity.ActivityEvents)
                         {
-                            PlayMusicEvent(activity.ActivityName, musicEvent.EventName, musicEvent.EventHash);
+                            if (e.Item.Title == musicEvent.EventName)
+                            {
+                                PlayMusicEvent(activity.ActivityName, musicEvent.EventName, musicEvent.EventHash);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
-            foreach (var content in jsonOutput.OnlineContent)
+            if (!eventFound)
             {
-                if (content.ContentName == currentMenuName)
+                foreach (var content in jsonOutput.OnlineContent)
                 {
-                    foreach (var musicEvent in content.ContentEvents)
+                    if (content.ContentName == currentMenuName)
                     {
-                        if (e.Item.Title == musicEvent.EventName)
+                        foreach (var musicEvent in content.ContentEvents)
                         {
-                            PlayMusicEvent(content.ContentName, musicEvent.EventName, musicEvent.EventHash);
+                            if (e.Item.Title == musicEvent.EventName)
+                            {
+                                PlayMusicEvent(content.ContentName, musicEvent.EventName, musicEvent.EventHash);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
-            foreach (var other in jsonOutput.Miscellaneous)
+            if (!eventFound)
             {
-                if (other.OtherName == currentMenuName)
+                foreach (var other in jsonOutput.Miscellaneous)
                 {
-                    foreach (var musicEvent in other.OtherEvents)
+                    if (other.OtherName == currentMenuName)
                     {
-                        if (e.Item.Title == musicEvent.EventName)
+                        foreach (var musicEvent in other.OtherEvents)
                         {
-                            PlayMusicEvent(other.OtherName, musicEvent.EventName, musicEvent.EventHash);
+                            if (e.Item.Title == musicEvent.EventName)
+                            {
+                                PlayMusicEvent(other.OtherName, musicEvent.EventName, musicEvent.EventHash);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -1449,75 +1482,93 @@ namespace Slav_Menu
         {
             string userInput = Game.GetUserInput();
             bool musicEventFound = false;
-            foreach (var mission in jsonOutput.Missions)
+            if (!musicEventFound)
             {
-                foreach (var musicEvent in mission.MissionEvents)
+                foreach (var mission in jsonOutput.Missions)
                 {
-                    if (musicEvent.EventHash == userInput)
+                    foreach (var musicEvent in mission.MissionEvents)
                     {
-                        PlayMusicEvent(mission.MissionName, musicEvent.EventName, musicEvent.EventHash);
-                        musicEventFound = true;
-                        break;
+                        if (musicEvent.EventHash == userInput)
+                        {
+                            PlayMusicEvent(mission.MissionName, musicEvent.EventName, musicEvent.EventHash);
+                            musicEventFound = true;
+                            break;
+                        }
                     }
                 }
             }
-            foreach (var strangerAndFreak in jsonOutput.StrangersAndFreaks)
+            if (!musicEventFound)
             {
-                foreach (var musicEvent in strangerAndFreak.StrangerAndFreakEvents)
+                foreach (var strangerAndFreak in jsonOutput.StrangersAndFreaks)
                 {
-                    if (musicEvent.EventHash == userInput)
+                    foreach (var musicEvent in strangerAndFreak.StrangerAndFreakEvents)
                     {
-                        PlayMusicEvent(strangerAndFreak.StrangerAndFreakName, musicEvent.EventName, musicEvent.EventHash);
-                        musicEventFound = true;
-                        break;
+                        if (musicEvent.EventHash == userInput)
+                        {
+                            PlayMusicEvent(strangerAndFreak.StrangerAndFreakName, musicEvent.EventName, musicEvent.EventHash);
+                            musicEventFound = true;
+                            break;
+                        }
                     }
                 }
             }
-            foreach (var randomEvent in jsonOutput.RandomEvents)
+            if (!musicEventFound)
             {
-                foreach (var musicEvent in randomEvent.RandomMusicEvents)
+                foreach (var randomEvent in jsonOutput.RandomEvents)
                 {
-                    if (musicEvent.EventHash == userInput)
+                    foreach (var musicEvent in randomEvent.RandomMusicEvents)
                     {
-                        PlayMusicEvent(randomEvent.RandomEventName, musicEvent.EventName, musicEvent.EventHash);
-                        musicEventFound = true;
-                        break;
+                        if (musicEvent.EventHash == userInput)
+                        {
+                            PlayMusicEvent(randomEvent.RandomEventName, musicEvent.EventName, musicEvent.EventHash);
+                            musicEventFound = true;
+                            break;
+                        }
                     }
                 }
             }
-            foreach (var activity in jsonOutput.Activities)
+            if (!musicEventFound)
             {
-                foreach (var musicEvent in activity.ActivityEvents)
+                foreach (var activity in jsonOutput.Activities)
                 {
-                    if (musicEvent.EventHash == userInput)
+                    foreach (var musicEvent in activity.ActivityEvents)
                     {
-                        PlayMusicEvent(activity.ActivityName, musicEvent.EventName, musicEvent.EventHash);
-                        musicEventFound = true;
-                        break;
+                        if (musicEvent.EventHash == userInput)
+                        {
+                            PlayMusicEvent(activity.ActivityName, musicEvent.EventName, musicEvent.EventHash);
+                            musicEventFound = true;
+                            break;
+                        }
                     }
                 }
             }
-            foreach (var content in jsonOutput.OnlineContent)
+            if (!musicEventFound)
             {
-                foreach (var musicEvent in content.ContentEvents)
+                foreach (var content in jsonOutput.OnlineContent)
                 {
-                    if (musicEvent.EventHash == userInput)
+                    foreach (var musicEvent in content.ContentEvents)
                     {
-                        PlayMusicEvent(content.ContentName, musicEvent.EventName, musicEvent.EventHash);
-                        musicEventFound = true;
-                        break;
+                        if (musicEvent.EventHash == userInput)
+                        {
+                            PlayMusicEvent(content.ContentName, musicEvent.EventName, musicEvent.EventHash);
+                            musicEventFound = true;
+                            break;
+                        }
                     }
                 }
             }
-            foreach (var other in jsonOutput.Miscellaneous)
+            if (!musicEventFound)
             {
-                foreach (var musicEvent in other.OtherEvents)
+                foreach (var other in jsonOutput.Miscellaneous)
                 {
-                    if (musicEvent.EventHash == userInput)
+                    foreach (var musicEvent in other.OtherEvents)
                     {
-                        PlayMusicEvent(other.OtherName, musicEvent.EventName, musicEvent.EventHash);
-                        musicEventFound = true;
-                        break;
+                        if (musicEvent.EventHash == userInput)
+                        {
+                            PlayMusicEvent(other.OtherName, musicEvent.EventName, musicEvent.EventHash);
+                            musicEventFound = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -1529,9 +1580,28 @@ namespace Slav_Menu
                 }
             }
         }
-        private void DisableAmbientEvent(object sender, EventArgs e)
+        private void ManualPlayMusicEvent(object sender, EventArgs e)
         {
-            if (disableAmbientItem.Checked)
+            string userInput = Game.GetUserInput();
+            if (notifEnabled)
+            {
+                Notification.Show("Playing \"~g~" + userInput + "~s~\" Manually");
+            }
+            clipboardText = "Event Hash: " + userInput;
+            playingMusicEvent = userInput;
+            Function.Call(Hash.PREPARE_MUSIC_EVENT, userInput);
+            Function.Call(Hash.TRIGGER_MUSIC_EVENT, userInput);
+        }
+        private void AmbientEventInvoker(object sender, EventArgs e)
+        {
+            disableAmbient = disableAmbientItem.Checked;
+            slavSettings.SetValue("General", "DisableAmbientAudio", disableAmbient);
+            slavSettings.Save();
+            DisableAmbientEvent();
+        }
+        private void DisableAmbientEvent()
+        {
+            if (disableAmbient)
             {
                 Function.Call(Hash.SET_AUDIO_FLAG, "DisableFlightMusic", true);
                 Function.Call(Hash.SET_AUDIO_FLAG, "WantedMusicDisabled", true);
